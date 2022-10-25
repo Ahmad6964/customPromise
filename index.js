@@ -1,72 +1,56 @@
-const PANDING = 0
-const FULFILLED = 1
-const REJECTED = 2
+class myPromise{
+    constructor(handlerFun){
+        this.state = "pending"
+        this.value = null
 
-function customPromise (executor){
-    let state = PANDING
-    let value = null
-    let handlers = []
-    let catchers = []
-
-
-    function resolve(result){
-        if(state!== PANDING) return;
-
-
-        state = FULFILLED
-        value = result
-
-        handlers.forEach((h)=> h(value))
-    }
-
-    function reject(err){
-        if(state !== PANDING) return;
-
-        state = REJECTED
-        value = err
-
-        catchers.forEach((c)=> c(value))
-    }
-
-    this.then = function(successCallback){
-        if(state === FULFILLED){
-            successCallback(value)
-        }else{
-            handlers.push(successCallback)
+        const resolve = (result) => {
+            if(this.state === "pending"){
+                this.state = "fulfilled"
+                this.value = result
+            }
         }
-    }
 
-    this.catch = function(failureCallback){
-        if(state === REJECTED){
-            failureCallback(value)
-        }else{
-            catchers.push(failureCallback)
+        const reject = (result)=> {
+            if(this.state === "pending"){
+                this.state = "rejected"
+                this.value = result
+            }
         }
-    }
+            handlerFun(resolve , reject);
 
-    executor(resolve , reject);
+            this.then = function(succesCb){
+                if(this.state === "fulfilled"){
+                    succesCb(this.value);
+                }
+            }
 
-}
-
-const doWork = (res , rej)=>{
-    if(2==1){
-        setTimeout(()=>{
-           res('Promise Resolved Hello')
-        }, 1000)
-    }else{
-        setTimeout(()=>{
-           rej('Promise Rejected Bye')
-        }, 1000)
+            this.catch = function(failureCb){
+                if(this.state === "rejected"){
+                    failureCb(this.value);
+                }
+            }
+       
     }
 }
 
-let greetMsg = new customPromise(doWork)
-
-
-greetMsg.then((val)=>{
-    console.log("then log", val)
+// Code Testing
+const test1 = new myPromise((resolve,reject)=>{
+    resolve("resolved");
+});
+const test2 = new myPromise((resolve , reject)=>{
+    reject("rejected")
 })
 
-greetMsg.catch((val)=>{
-    console.log("catch log", val)
-});
+test1.then((res)=>{
+    console.log(res);
+})
+test1.catch((err)=>{
+    console.log(err)
+})
+
+test2.then((res)=>{
+    console.log(res);
+})
+test2.catch((err)=>{
+    console.log(err);
+})
